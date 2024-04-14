@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo, "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #e6e6e6;
+        }
+        header {
+            padding: 30px 4% 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            z-index: 1000; /* Ensure header is on top of other content */
+        }
+        .h1 {
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+        }
+        a {
+            text-decoration: none;
+            color: #4b4b4b;
+        }
+        nav {
+            margin-left: auto; /* Align nav to the right */
+        }
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0; /* Remove default padding */
+            display: flex;
+        }
+        li {
+            margin-left: 15px;
+            font-size: 14px;
+        }
+        .SelectNav {
+            font-size: large;
+        }
+        main {
+            color: black;
+
+            max-width: 1020px;
+            margin-top: 100px; /* Adjust margin top to avoid overlap with header */
+            margin-left: auto;
+            margin-right: auto;
+            padding: 30px;
+        }
+        p{
+            font-size: large;
+        }
+        .list{
+            font-size: large;
+        }
+        .text{
+            display: flex;
+        }
+        .img{
+            width: 500px;
+            height: 250px;
+        }
+        .title{
+            display: inline;
+            font-size: x-large;
+        }
+        input[type='file'] {
+            color: rgb(31, 41, 55);
+            cursor: pointer;
+            border: 1px solid rgb(191, 194, 199);
+            border-radius: 0.375rem;
+            padding-right: 0.5rem;
+            width: 24rem;
+        }
+
+        ::file-selector-button,
+        ::-webkit-file-upload-button {
+            background-color: rgb(209, 213, 219);
+            color: rgb(31, 41, 55);
+            border: none;
+            cursor: pointer;
+            border-right: 1px solid rgb(191, 194, 199);
+            padding: 0.25rem 1rem;
+            margin-right: 1rem;
+        }
+        label {
+            font-size: large;
+        }
+        .btn-square-shadow {
+            display: inline-block;
+            padding: 0.5em 1em;
+            text-decoration: none;
+            background: #668ad8;/*ボタン色*/
+            color: #FFF;
+            border-bottom: solid 4px #627295;
+            border-radius: 3px;
+        }
+        .btn-square-shadow:active {
+            /*ボタンを押したとき*/
+            -webkit-transform: translateY(4px);
+            transform: translateY(4px);/*下に動く*/
+            box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.2);/*影を小さく*/
+            border-bottom: none;
+        }
+    </style>
+
+    <script>
+        function post() {
+            alert("投稿を開始します。しばらくお待ちください。")
+            console.log("Click");
+            const videoInput = document.querySelector('#videoInput');
+            const imgInput = document.querySelector("#imgInput");
+            const videoFile = videoInput.files[0];
+            const imgFile = imgInput.files[0];
+            console.log("Done first load");
+            const titleInput = document.getElementById('titleInput');
+            const text = document.getElementById("info");
+            const title = titleInput.value;
+            const xhr = new XMLHttpRequest();
+            if (videoFile && imgFile) {
+                console.log("File: true")
+                const formData = new FormData();
+                formData.append('video', videoFile);
+                formData.append("img", imgFile);
+                formData.append('title', title); // タイトルを追加
+                formData.append("text", text.value);
+                xhr.open("POST", "/video");
+                xhr.send(formData);
+                xhr.onloadend = (() =>{
+                    const video_id = xhr.responseText;
+                    alert(video_id);
+                    window.open(`/watch?v=${video_id}`);
+                    console.log("End");
+                });
+            } else {
+                console.log('No file selected');
+            }
+        };
+    </script>
+</head>
+<body>
+<header>
+    <a href="/"><h1 class="title h1">TanaTube</h1></a>
+</header>
+<main>
+    <label for="video">動画: </label>
+    <input type="file" id="videoInput" name="video" accept=".mp4, .mpeg, .mov"><br>
+    <label for="img">サムネイル: </label>
+    <input type="file" id="imgInput" name="img" accept=".jpeg, .jpg, .png, .img"><br>
+    <label for="title">title: </label>
+    <input type="text" id="titleInput" name="title">
+    <p>概要欄</p>
+    <textarea name="" id="info" cols="30" rows="10"></textarea><br>
+    <button id="uploadFile" class="btn-square-shadow" onclick="post()">Upload File</button>
+</main>
+</body>
+</html>

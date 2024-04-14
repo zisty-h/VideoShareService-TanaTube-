@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo, "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #e6e6e6;
+        }
+        header {
+            padding: 30px 4% 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            z-index: 1000; /* Ensure header is on top of other content */
+        }
+        .h1 {
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+        }
+        a {
+            text-decoration: none;
+            font-size: large;
+            color: #4b4b4b;
+        }
+        nav {
+            margin-left: auto; /* Align nav to the right */
+        }
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0; /* Remove default padding */
+            display: flex;
+        }
+        li {
+            margin-left: 15px;
+            font-size: 14px;
+        }
+        .SelectNav {
+            font-size: large;
+        }
+        main {
+            color: black;
+            /*
+            max-width: 1020px;*/
+            margin-top: 50px; /* Adjust margin top to avoid overlap with header */
+            margin-left: auto;
+            margin-right: auto;
+            padding: 30px;
+        }
+        p{
+            font-size: large;
+        }
+        .list{
+            font-size: large;
+        }
+        .text{
+            display: flex;
+        }
+        .img{
+            width: 500px;
+            height: 250px;
+        }
+        .title{
+            display: inline;
+            font-size: x-large;
+        }
+        input[type='file'] {
+            color: rgb(31, 41, 55);
+            cursor: pointer;
+            border: 1px solid rgb(191, 194, 199);
+            border-radius: 0.375rem;
+            padding-right: 0.5rem;
+            width: 24rem;
+        }
+
+        ::file-selector-button,
+        ::-webkit-file-upload-button {
+            background-color: rgb(209, 213, 219);
+            color: rgb(31, 41, 55);
+            border: none;
+            cursor: pointer;
+            border-right: 1px solid rgb(191, 194, 199);
+            padding: 0.25rem 1rem;
+            margin-right: 1rem;
+        }
+        label {
+            font-size: large;
+        }
+        img{
+            width: 320px;
+            height: 180px;
+        }
+    </style>
+
+    <script>
+        const side = 3;
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "/img_list");
+        xhr.send();
+
+        xhr.onloadend = (() =>{
+            let videos_html = "";
+            const xhr2 = new XMLHttpRequest();
+            const videos = JSON.parse(xhr.responseText);
+            let keys = Object.keys(videos);
+            let len = keys.length;
+            console.log(keys);
+            let no = 0;
+            if (len%side !== 0){
+                while (len%side !== 0){
+                    keys.push("");
+                    len += 1;
+                }
+            }
+            for (let i=0; i<parseInt(len/side); i++){
+                videos_html += "<div style='display: flex'>"
+                for (let ii=0; ii<side; ii++){
+                    console.log(keys[no]);
+                    if (keys[no] !== "") {
+                        videos_html += `<a href="/watch?v=${keys[no]}"><img src="/img?img_id=${keys[no]}"><p>${videos[keys[no]]["title"]}</p></a>`
+                    }
+                    no ++;
+                }
+                videos_html += "</div>"
+            }
+            document.querySelectorAll("main")[0].innerHTML = videos_html;
+        });
+    </script>
+</head>
+<body>
+<header>
+    <h1 class="title h1">TanaTube</h1>
+    <nav><a href="/post">投稿</a></nav>
+</header>
+<main>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo, "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #e6e6e6;
+        }
+        header {
+            padding: 30px 4% 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            z-index: 1000; /* Ensure header is on top of other content */
+        }
+        .h1 {
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+        }
+        a {
+            text-decoration: none;
+            color: #4b4b4b;
+            font-size: large;
+        }
+        nav {
+            margin-left: auto; /* Align nav to the right */
+        }
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0; /* Remove default padding */
+            display: flex;
+        }
+        li {
+            margin-left: 15px;
+            font-size: 14px;
+        }
+        .SelectNav {
+            font-size: large;
+        }
+        main {
+            color: black;
+
+            /*max-width: 1020px;*/
+            margin-top: 50px; /* Adjust margin top to avoid overlap with header */
+            margin-left: auto;
+            margin-right: auto;
+            padding: 30px;
+        }
+        p{
+            font-size: large;
+        }
+        .list{
+            font-size: large;
+        }
+        .text{
+            display: flex;
+        }
+        .img{
+            width: 500px;
+            height: 250px;
+        }
+        .title{
+            display: inline;
+            font-size: x-large;
+        }
+        .video_header{
+            width: 801px;
+        }
+        .value{
+            margin-left: auto;
+        }
+        label{
+            font-size: large;
+        }
+        .comments{
+            font-size: large;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/"><h1 class="title h1">TanaTube</h1></a>
+        <nav><a href="/post">投稿</a></nav>
+    </header>
+    <main>
+        <div>
+            <video src="" controls class="video" style="width: 801px; height: 451px; left: 0px; top: 0px;"></video>
+        </div>
+        <div style="display: flex" class="video_header">
+            <h1 class="h1" id="title">Title</h1>
+            <div class="value"><button id="good_button">Good: 0</button><button id="bad_button">Bad: 0</button></div>
+        </div>
+
+        <fieldset id="text" style="width: 801px;"></fieldset>
+        <div style="width: 801px;">
+            <h2>コメント</h2>
+            <label for="name">user_name: </label>
+            <input name="name" id="user-name"><br>
+            <textarea name="" id="comment_text" cols="30" rows="10" style="width: 480px; height: 50px;"></textarea>
+            <button id="comment_post">投稿</button>
+            <div id="comments"></div>
+        </div>
+        <script>
+            const url = new URL(location.href);
+            const video_id = url.searchParams.get("v");
+            const video_tag = document.querySelectorAll(".video")[0];
+            const title = document.querySelector("#title");
+            const text = document.querySelector("#text");
+            const good_button = document.querySelector("#good_button");
+            const bad_button = document.querySelector("#bad_button");
+            const comments = document.querySelector("#comments");
+            const comment_texts = document.querySelector("#comment_text");
+            const comment_post = document.querySelector("#comment_post");
+            const user = document.querySelector("#user-name");
+            const xhr = new XMLHttpRequest();
+            
+            xhr.open("GET", `/getTitle?id=${video_id}`);
+            xhr.send();
+            xhr.onloadend = (() =>{
+                const video_info = JSON.parse(xhr.responseText);
+                title.innerText = video_info["title"];
+                text.innerText = `視聴回数: ${video_info["views"]}\n${video_info["text"]}`;
+                good_button.innerText = `Good: ${video_info["good"]}`;
+                bad_button.innerText = `Bad: ${video_info["bad"]}`;
+                video_tag.src = `/video_watch?v=${video_id}`;
+
+                let comments_text = "";
+                const comments_data = video_info["comment"];
+                console.log(comments_data);
+                const names = Object.values(comments_data);
+                const texts = Object.keys(comments_data);
+
+                for (let i=0; i<names.length; i++){
+                    comments_text += `${names[i]}: ${texts[i]}\n`;
+                    console.log(comments_text);
+                }
+                comments.innerText = comments_text;
+            });
+
+            good_button.addEventListener("click", () =>{
+                const formData = new FormData();
+                formData.append("video_id", video_id);
+                formData.append("value", "good");
+                console.log(formData);
+                xhr.open("POST", "/video_value");
+                xhr.send(formData);
+
+               xhr.onloadend = (() =>{
+                   const video_info = JSON.parse(xhr.responseText);
+                   console.log(video_info);
+                   good_button.innerText = `Good: ${video_info[video_id]["good"]}`;
+                   bad_button.innerText = `Bad: ${video_info[video_id]["bad"]}`;
+               })
+            });
+
+            bad_button.addEventListener("click", () =>{
+                const formData = new FormData();
+                formData.append("video_id", video_id);
+                formData.append("value", "bad");
+                console.log(formData);
+                xhr.open("POST", "/video_value");
+                xhr.send(formData);
+
+                xhr.onloadend = (() =>{
+                    const video_info = JSON.parse(xhr.responseText);
+                    console.log(video_info);
+                    good_button.innerText = `Good: ${video_info[video_id]["good"]}`;
+                    bad_button.innerText = `Bad: ${video_info[video_id]["bad"]}`;
+                });
+            });
+
+            comment_post.addEventListener("click", () =>{
+                const comment_text = comment_texts.value;
+                const user_name = user.value;
+                console.log(
+                    `Try post comment.\nvideo_id: ${video_id}\nuser: ${user_name}\ncomment: ${comment_text}`
+                );
+
+                const formData = new FormData();
+                formData.append("video_id", video_id);
+                formData.append("comment", comment_text);
+                formData.append("user", user_name);
+                xhr.open("POST", "/comments");
+                xhr.send(formData);
+
+                xhr.onloadend = (() =>{
+                    let text = "";
+                    const video_data = JSON.parse(xhr.responseText)[video_id];
+                    console.log(video_data);
+                    const comments_data = video_data["comment"];
+                    console.log(comments_data);
+                    const texts = Object.keys(comments_data);
+                    const names = Object.values(comments_data);
+                    for (let i = 0; i<names.length; i++){
+                        text += `${names[i]}: ${texts[i]}\n`;
+                        console.log(text);
+                    }
+                    comments.innerText = text;
+                });
+            });
+
+
+        </script>
+    </main>
+</body>
+</html>
